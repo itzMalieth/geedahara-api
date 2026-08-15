@@ -9,7 +9,7 @@ __pycache__/
 .pytest_cache/
 
 # Databases & SQLite Dumps
-*.db
+
 *.sqlite
 *.sqlite3
 *.log

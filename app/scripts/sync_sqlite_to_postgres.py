@@ -27,16 +27,29 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 
 def get_sqlite_db_path():
+    # 1. Allow specifying .db file as CLI argument
+    if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
+        return os.path.abspath(sys.argv[1])
+
+    # 2. Check standard paths
     possible_paths = [
         os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "sarigama_pipeline", "music_app_sqlite.db")),
         os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "music_app_sqlite.db")),
         "sarigama_pipeline/music_app_sqlite.db",
         "music_app_sqlite.db",
+        "sarigama_uploads.db",
     ]
     for p in possible_paths:
         if os.path.exists(p):
             return p
-    raise FileNotFoundError("Could not find music_app_sqlite.db")
+
+    # 3. Auto-find any .db file in project root
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    for f in os.listdir(root_dir):
+        if f.endswith(".db"):
+            return os.path.join(root_dir, f)
+
+    raise FileNotFoundError("Could not find any SQLite database file (.db) in the project directory.")
 
 
 def sync_sqlite_to_postgres():
