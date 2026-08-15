@@ -16,6 +16,7 @@ class Song(Base):
     play_count = Column(Integer, default=0, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     r2_lrc_link = Column(String, nullable=True)
+    r2_full_lyrics_link = Column(String, nullable=True)
 
 # ==========================================
 # Automated Meilisearch Sync (Event Listeners)
