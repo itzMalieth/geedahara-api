@@ -15,6 +15,8 @@ from app.models.history import ListeningHistory
 from app.models.device_token import DeviceToken
 from app.models.notification import Notification
 
+from fastapi.middleware.cors import CORSMiddleware
+
 # Create all database tables (including user_sessions added in Phase 2, and devices/notifications in Phase 4)
 Base.metadata.create_all(bind=engine)
 
@@ -24,6 +26,15 @@ Base.metadata.create_all(bind=engine)
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 
 app = FastAPI(title=settings.PROJECT_NAME)
+
+# Enable CORS for browser web applications & local file pages
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Attach limiter to app state (required by slowapi)
 app.state.limiter = limiter
