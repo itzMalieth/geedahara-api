@@ -1,0 +1,29 @@
+# Environment & Virtual Environments
+venv/
+ENV/
+env/
+.env
+.env.*
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# Databases & SQLite Dumps
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Secrets & Private Credentials
+credentials/
+firebase-service-account.json
+client_secret*.json
+*.pem
+*.key
+
+# OS & IDE Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.antigravity/

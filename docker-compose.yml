@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: lyrics_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      POSTGRES_DB: ${POSTGRES_DB:-songs_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.8
+    container_name: lyrics_meilisearch
+    restart: always
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-aSampleMasterKey}
+      MEILI_ENV: ${MEILI_ENV:-production}
+    volumes:
+      - meili_data:/meili_data
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  api:
+    build: .
+    container_name: lyrics_api
+    restart: always
+    expose:
+      - "8000"
+    ports:
+      - "8100:8000"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-admin}@db:5432/${POSTGRES_DB:-songs_db}"
+      MEILI_URL: "http://meilisearch:7700"
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-aSampleMasterKey}
+    depends_on:
+      - db
+      - meilisearch
+    volumes:
+      - .:/app
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: lyrics_caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-api.yourdomain.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+volumes:
+  postgres_data:
+  meili_data:
+  caddy_data:
+  caddy_config:

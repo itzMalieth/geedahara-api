@@ -1,0 +1,14 @@
+{$DOMAIN:api.yourdomain.com} {
+    # Reverse proxy all requests to the FastAPI application
+    reverse_proxy api:8000
+
+    # Enable Gzip and Zstd compression
+    encode gzip zstd
+
+    # Security headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "no-referrer-when-downgrade"
+    }
+}
