@@ -20,6 +20,16 @@ from fastapi.middleware.cors import CORSMiddleware
 # Create all database tables (including user_sessions added in Phase 2, and devices/notifications in Phase 4)
 Base.metadata.create_all(bind=engine)
 
+# Auto-migrate any newly added columns if they don't exist yet
+from sqlalchemy import text
+with engine.connect() as conn:
+    try:
+        conn.execute(text("ALTER TABLE songs ADD COLUMN IF NOT EXISTS r2_lrc_link VARCHAR;"))
+        conn.execute(text("ALTER TABLE songs ADD COLUMN IF NOT EXISTS r2_full_lyrics_link VARCHAR;"))
+        conn.commit()
+    except Exception as e:
+        print(f"[DB Startup Migration] Column check notice: {e}")
+
 # ---------------------------------------------------------------------------
 # Rate Limiter (slowapi)
 # ---------------------------------------------------------------------------

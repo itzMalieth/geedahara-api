@@ -18,6 +18,22 @@ class Song(Base):
     r2_lrc_link = Column(String, nullable=True)
     r2_full_lyrics_link = Column(String, nullable=True)
 
+    @property
+    def lrc_url(self):
+        if self.r2_lrc_link:
+            return self.r2_lrc_link
+        if self.original_music_link and 'original.mp3' in self.original_music_link:
+            return self.original_music_link.replace('original.mp3', 'lyrics.lrc')
+        return None
+
+    @property
+    def full_lyrics_url(self):
+        if self.r2_full_lyrics_link:
+            return self.r2_full_lyrics_link
+        if self.original_music_link and 'original.mp3' in self.original_music_link:
+            return self.original_music_link.replace('original.mp3', 'full_lyrics.txt')
+        return None
+
 # ==========================================
 # Automated Meilisearch Sync (Event Listeners)
 # ==========================================

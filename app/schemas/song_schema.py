@@ -28,16 +28,9 @@ class SongResponse(SongBase):
             orig = data.get('original_music_link')
             if orig and 'original.mp3' in orig:
                 if not data.get('lrc_url'):
-                    data['lrc_url'] = orig.replace('original.mp3', 'lyrics.lrc')
+                    data['lrc_url'] = data.get('r2_lrc_link') or orig.replace('original.mp3', 'lyrics.lrc')
                 if not data.get('full_lyrics_url'):
-                    data['full_lyrics_url'] = orig.replace('original.mp3', 'full_lyrics.txt')
-        elif hasattr(data, 'original_music_link'):
-            orig = getattr(data, 'original_music_link', None)
-            if orig and 'original.mp3' in orig:
-                if not getattr(data, 'lrc_url', None):
-                    setattr(data, 'lrc_url', orig.replace('original.mp3', 'lyrics.lrc'))
-                if not getattr(data, 'full_lyrics_url', None):
-                    setattr(data, 'full_lyrics_url', orig.replace('original.mp3', 'full_lyrics.txt'))
+                    data['full_lyrics_url'] = data.get('r2_full_lyrics_link') or orig.replace('original.mp3', 'full_lyrics.txt')
         return data
 
     @field_validator('original_music_link', 'instrumental_music_link', 'cover_url', 'lrc_url', 'full_lyrics_url', mode='before')
