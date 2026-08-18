@@ -44,7 +44,6 @@ class NotificationResponse(BaseModel):
 def get_notifications(
     limit: int = 20,
     skip: int = 0,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
