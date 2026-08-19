@@ -130,13 +130,16 @@ def create_and_broadcast_notification(
         data_payload['type'] = body.type
     if body.reference_id:
         data_payload['reference_id'] = body.reference_id
+    if body.image_url:
+        data_payload['image_url'] = body.image_url
         
     # 3. Broadcast to all users via FCM topic
     send_topic_notification(
         topic="helaGee_all_users",
         title=body.title,
         body=body.body,
-        data=data_payload
+        data=data_payload,
+        image_url=body.image_url
     )
     
     notification.id = str(notification.id)
