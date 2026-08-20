@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, Integer
+from sqlalchemy import Column, String, DateTime, Integer, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from app.core.database import Base
@@ -17,21 +17,35 @@ class Song(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     r2_lrc_link = Column(String, nullable=True)
     r2_full_lyrics_link = Column(String, nullable=True)
+    
+    # Verified lyrics tracking
+    has_lrc = Column(Boolean, default=False, index=True, nullable=False)
+    has_full_lyrics = Column(Boolean, default=False, index=True, nullable=False)
+    full_lyrics_format = Column(String, nullable=True) # 'txt' | 'json'
+    r2_folder = Column(String, index=True, nullable=True) # folder slug in R2
+    lyrics_updated_at = Column(DateTime(timezone=True), index=True, nullable=True)
 
     @property
     def lrc_url(self):
-        if self.r2_lrc_link:
-            return self.r2_lrc_link
-        if self.original_music_link and 'original.mp3' in self.original_music_link:
-            return self.original_music_link.replace('original.mp3', 'lyrics.lrc')
+        if self.has_lrc:
+            if self.r2_lrc_link:
+                return self.r2_lrc_link
+            if self.r2_folder:
+                return f"https://music.ifreaky.us/{self.r2_folder}/lyrics.lrc"
+            if self.original_music_link and 'original.mp3' in self.original_music_link:
+                return self.original_music_link.replace('original.mp3', 'lyrics.lrc')
         return None
 
     @property
     def full_lyrics_url(self):
-        if self.r2_full_lyrics_link:
-            return self.r2_full_lyrics_link
-        if self.original_music_link and 'original.mp3' in self.original_music_link:
-            return self.original_music_link.replace('original.mp3', 'full_lyrics.txt')
+        if self.has_full_lyrics:
+            if self.r2_full_lyrics_link:
+                return self.r2_full_lyrics_link
+            ext = 'json' if self.full_lyrics_format == 'json' else 'txt'
+            if self.r2_folder:
+                return f"https://music.ifreaky.us/{self.r2_folder}/full_lyrics.{ext}"
+            if self.original_music_link and 'original.mp3' in self.original_music_link:
+                return self.original_music_link.replace('original.mp3', f'full_lyrics.{ext}')
         return None
 
 # ==========================================
@@ -48,6 +62,8 @@ def format_for_meili(song):
         "original_music_link": song.original_music_link,
         "instrumental_music_link": song.instrumental_music_link,
         "cover_url": song.cover_url,
+        "has_lrc": song.has_lrc,
+        "has_full_lyrics": song.has_full_lyrics,
     }
 
 # ------------------------------------------

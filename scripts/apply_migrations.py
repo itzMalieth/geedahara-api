@@ -8,7 +8,8 @@ def run():
     migrations = [
         "migrations/auth_phase1_migration.sql",
         "migrations/auth_phase3_migration.sql",
-        "migrations/auth_phase4_migration.sql"
+        "migrations/auth_phase4_migration.sql",
+        "migrations/lyrics_columns_migration.sql"
     ]
 
     for m in migrations:
