@@ -25,10 +25,10 @@ class SyncLyricsRequest(BaseModel):
     folder_name: Optional[str] = None
     song_id: Optional[UUID] = None
     song_name: Optional[str] = None
-    has_lrc: bool = False
+    has_lrc: Optional[bool] = None
     r2_lrc_link: Optional[str] = None
-    has_full_lyrics: bool = False
-    full_lyrics_format: Optional[str] = 'txt'  # 'txt' | 'json'
+    has_full_lyrics: Optional[bool] = None
+    full_lyrics_format: Optional[str] = None  # 'txt' | 'json'
     r2_full_lyrics_link: Optional[str] = None
 
 class SongResponse(SongBase):
