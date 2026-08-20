@@ -11,6 +11,7 @@ Reads `lrc-generator/r2_music_records.db` and populates:
 into the PostgreSQL `songs` table.
 """
 
+import os
 import sys
 import sqlite3
 from pathlib import Path
@@ -18,15 +19,25 @@ from datetime import datetime, timezone
 import psycopg2
 from psycopg2.extras import execute_batch
 
+def find_sqlite_db(script_dir: Path) -> Path:
+    candidates = [
+        script_dir.parent / "r2_music_records.db",
+        script_dir / "r2_music_records.db",
+        script_dir.parent.parent / "lrc-generator" / "r2_music_records.db",
+        Path("r2_music_records.db"),
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return candidates[0]
+
 def main():
-    # Resolve paths
     script_dir = Path(__file__).resolve().parent
-    project_root = script_dir.parent.parent
-    sqlite_db_path = project_root / "lrc-generator" / "r2_music_records.db"
+    sqlite_db_path = find_sqlite_db(script_dir)
 
     if not sqlite_db_path.exists():
-        print(f"Error: SQLite database not found at {sqlite_db_path}")
-        print("Please run `python lrc-generator/scan_r2_records.py` first.")
+        print(f"Error: SQLite database not found. Checked: {sqlite_db_path}")
+        print("Please ensure r2_music_records.db exists in lyrics-api/ or lrc-generator/.")
         sys.exit(1)
 
     print(f"[*] Reading SQLite records from: {sqlite_db_path}")
@@ -43,9 +54,10 @@ def main():
 
     print(f"[+] Loaded {len(sqlite_rows)} song records from SQLite.")
 
-    # Connect to PostgreSQL
-    pg_dsn = "postgresql://postgres:admin@localhost:5432/songs_db"
+    # Connect to PostgreSQL using DATABASE_URL env var or default
+    pg_dsn = os.getenv("DATABASE_URL", "postgresql://postgres:admin@localhost:5432/songs_db")
     try:
+        print(f"[*] Connecting to PostgreSQL: {pg_dsn.split('@')[-1] if '@' in pg_dsn else pg_dsn}")
         pg_conn = psycopg2.connect(pg_dsn)
         pg_conn.autocommit = False
         pg_cur = pg_conn.cursor()
